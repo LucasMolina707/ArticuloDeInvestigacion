@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrumento Final - Inteligencia Financiera</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --azul-uniminuto: #003366;
+            --amarillo-uniminuto: #FFCC00;
+            --fondo: #f4f7f6;
+            --texto: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--fondo);
+            color: var(--texto);
+            margin: 0;
+            padding: 15px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-top: 6px solid var(--amarillo-uniminuto);
+        }
+        h1, h2, h3 {
+            color: var(--azul-uniminuto);
+            text-align: center;
+        }
+        h1 { border-bottom: 2px solid var(--amarillo-uniminuto); padding-bottom: 10px; }
+        .section-title {
+            background-color: var(--azul-uniminuto);
+            color: #fff;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 35px;
+            font-size: 1.2rem;
+            border-left: 5px solid var(--amarillo-uniminuto);
+        }
+        .question {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .options label:hover { background: #eef2f5; }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--azul-uniminuto);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        .btn:hover { background: #002244; }
+        .btn-yellow { background: var(--amarillo-uniminuto); color: var(--azul-uniminuto); }
+        .btn-yellow:hover { background: #e6b800; }
+        .btn-green { background: #25D366; color: white; }
+        .btn-green:hover { background: #128C7E; }
+        .btn-gray { background: #7f8c8d; color: white; }
+        .btn-gray:hover { background: #606b6d; }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        @media (min-width: 600px) {
+            .action-buttons { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; color: var(--azul-uniminuto); }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+        }
+        #quiz-container, #result-wrapper { display: none; }
+        
+        #certificate { 
+            text-align: center; 
+            border: 8px solid var(--azul-uniminuto); 
+            padding: 40px 20px; 
+            border-radius: 0; 
+            background: white;
+            position: relative;
+        }
+        #certificate::after {
+            content: ""; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 2px solid var(--amarillo-uniminuto); pointer-events: none;
+        }
+        .analysis { background: #f8f9fa; padding: 20px; border-radius: 6px; margin-top: 20px; text-align: justify; border-left: 4px solid var(--azul-uniminuto); }
+        canvas { max-width: 100%; height: auto; margin: 20px auto; display: block; }
+        .code-box { background: #eee; padding: 10px; font-family: monospace; font-size: 1.2rem; font-weight: bold; margin-top: 20px; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="register-container">
+        <h1>Registro de Participante</h1>
+        <p style="text-align:center; font-weight:bold;">Población: Estudiantes de 9° semestre – Contaduría Pública</p>
+        <form id="register-form">
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" id="nombre" required>
+            </div>
+            <div class="form-group">
+                <label>Apellido:</label>
+                <input type="text" id="apellido" required>
+            </div>
+            <div class="form-group">
+                <label>Edad:</label>
+                <input type="number" id="edad" required min="15" max="99">
+            </div>
+            <div class="form-group">
+                <label>Género:</label>
+                <select id="genero" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Otro">Otro / Prefiero no decirlo</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-yellow">Comenzar Cuestionario</button>
+        </form>
+    </div>
+
+    <div id="quiz-container">
+        <h1>Instrumento: Inteligencia Financiera</h1>
+        <form id="quiz-form"></form>
+    </div>
+
+    <div id="result-wrapper">
+        <div id="certificate">
+            <h2 style="color: var(--azul-uniminuto); font-size: 1.8rem; margin-top:0;">CERTIFICADO DE PARTICIPACIÓN</h2>
+            <p>Se otorga el presente reconocimiento a:</p>
+            <h1 id="cert-nombre" style="color: var(--azul-uniminuto); font-size: 2.2rem; margin: 10px 0;"></h1>
+            <p style="font-size: 1.1rem;">Edad: <strong id="cert-edad"></strong> | Género: <strong id="cert-genero"></strong></p>
+            
+            <h3 id="cert-score" style="background: var(--amarillo-uniminuto); display: inline-block; padding: 10px 20px; border-radius: 20px; color: var(--azul-uniminuto);"></h3>
+            
+            <div style="width: 100%; max-width: 400px; margin: auto;">
+                <canvas id="radarChart"></canvas>
+            </div>
+            
+            <div class="analysis" id="cert-analisis"></div>
+            
+            <p style="margin-top: 30px; font-size: 0.9rem; color: #555;">Código de Análisis Único:</p>
+            <div class="code-box" id="cert-codigo"></div>
+            
+            <h3 style="margin-top:30px; color: var(--azul-uniminuto);">¡Gracias por su participación!</h3>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-gray" onclick="copiarCodigo()">Copiar Código</button>
+            <button class="btn btn-yellow" onclick="descargarCertificado()">Descargar Certificado</button>
+            <button class="btn btn-green" onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const preguntas = [
+    { sec: "SECCIÓN 1: CONOCIMIENTO TÉCNICO", q: "1. Una empresa aumenta sus ventas, pero su utilidad disminuye. ¿Qué lo explica mejor?", options: {a: "Reducción de activos", b: "Aumento del patrimonio", c: "Incremento en costos y gastos mayor al crecimiento en ventas", d: "Disminución del flujo de caja"} },
+    { q: "2. Un índice de liquidez corriente de 0,8 indica:", options: {a: "Dificultades para cubrir obligaciones de corto plazo", b: "Alta rentabilidad", c: "Exceso de efectivo", d: "Alta eficiencia"} },
+    { q: "3. Una empresa con alto endeudamiento en tasas crecientes enfrenta:", options: {a: "Mejora en utilidades", b: "Incremento en ventas", c: "Reducción de costos", d: "Mayor presión sobre su flujo de caja"} },
+    { q: "4. El VAN permite:", options: {a: "Medir liquidez", b: "Evaluar rentabilidad en valor presente", c: "Calcular endeudamiento", d: "Analizar rotación"} },
+    { q: "5. Si la TIR es menor a la tasa requerida:", options: {a: "Se acepta", b: "Se duplica la inversión", c: "Se rechaza", d: "No afecta"} },
+    { q: "6. Un flujo de caja positivo indica:", options: {a: "Rentabilidad", b: "Ausencia de deudas", c: "Más entradas que salidas de efectivo", d: "Alto patrimonio"} },
+    { q: "7. ¿Qué elemento afecta utilidad pero no flujo de caja directamente?", options: {a: "Pago a proveedores", b: "Venta de contado", c: "Compra de inventario", d: "Depreciación"} },
+    { q: "8. Un aumento en inventarios sin aumento en ventas indica:", options: {a: "Problemas de rotación", b: "Mayor liquidez", c: "Alta eficiencia", d: "Mayor rentabilidad"} },
+    { q: "9. Si la inflación supera la tasa de ahorro:", options: {a: "El dinero gana valor", b: "El dinero pierde poder adquisitivo", c: "No cambia nada", d: "Aumenta el ahorro"} },
+    { q: "10. ¿Qué caracteriza una inversión?", options: {a: "No tiene riesgo", b: "Es igual al ahorro", c: "Genera rendimientos futuros", d: "No requiere análisis"} },
+    { sec: "SECCIÓN 2: HABILIDAD ANALÍTICA<br><span style='font-size:0.9rem; font-weight:normal;'>Caso: Ventas aumento 10% | Costos aumento 20% | Utilidad disminuye | Endeudamiento alto | Flujo de caja negativo</span>", q: "11. El problema principal es:", options: {a: "Falta de activos", b: "Descontrol en costos y presión financiera", c: "Bajo nivel de ventas", d: "Reducción del patrimonio"} },
+    { q: "12. El mayor riesgo es:", options: {a: "Problemas de liquidez", b: "Pérdida de clientes", c: "Falta de inversión", d: "Baja productividad"} },
+    { q: "13. La causa del flujo negativo es:", options: {a: "Exceso de ventas", b: "Disminución de activos", c: "Altos costos y obligaciones financieras", d: "Bajo endeudamiento"} },
+    { q: "14. ¿Qué decisión agravaría la situación?", options: {a: "Controlar costos", b: "Optimizar operaciones", c: "Refinanciar deuda", d: "Aumentar endeudamiento sin mejorar rentabilidad"} },
+    { q: "15. La relación correcta es:", options: {a: "Más ventas siempre mejora el flujo", b: "Costos altos anulan crecimiento en ventas", c: "Mayor deuda no afecta liquidez", d: "Utilidad y flujo son iguales"} },
+    { sec: "SECCIÓN 3: TOMA DE DECISIONES", q: "16. Relación deuda/riesgo:", options: {a: "Rentabilidad moderada – bajo riesgo", b: "Alta rentabilidad – alto riesgo", c: "Ambas", d: "Ninguna"} },
+    { q: "17. Ante baja liquidez:", options: {a: "Aumentar gastos", b: "Incrementar inventarios", c: "Vender activos improductivos", d: "Aumentar crédito a clientes"} },
+    { q: "18. Expansión sin flujo suficiente:", options: {a: "Buscar financiamiento evaluando capacidad de pago", b: "Expandirse sin respaldo", c: "Ignorar flujo", d: "Reducir ingresos"} },
+    { q: "19. Si suben tasas de interés:", options: {a: "Reducir o refinanciar deuda", b: "Aumentar deuda", c: "Ignorar cambio", d: "Aumentar gastos"} },
+    { q: "20. Utilidad positiva y flujo negativo indica:", options: {a: "Buen desempeño", b: "Alta rentabilidad", c: "Bajo endeudamiento", d: "Problemas en capital de trabajo"} },
+    { sec: "SECCIÓN 4: COMPORTAMIENTO FINANCIERO", q: "21. Llevo control de mis ingresos y gastos", options: {a: "Nunca", b: "Casi nunca", c: "A veces", d: "Frecuentemente", e: "Siempre"} },
+    { q: "22. Evalúo mi capacidad de pago antes de endeudarme", options: {a: "Nunca", b: "Casi nunca", c: "A veces", d: "Frecuentemente", e: "Siempre"} },
+    { q: "23. Mantengo hábitos de ahorro", options: {a: "Nunca", b: "Casi nunca", c: "A veces", d: "Frecuentemente", e: "Siempre"} },
+    { q: "24. Analizo alternativas antes de decidir financieramente", options: {a: "Nunca", b: "Casi nunca", c: "A veces", d: "Frecuentemente", e: "Siempre"} },
+    { q: "25. Planifico mis finanzas a futuro", options: {a: "Nunca", b: "Casi nunca", c: "A veces", d: "Frecuentemente", e: "Siempre"} }
+];
+
+const respuestasCorrectas = {
+    q1:"c", q2:"a", q3:"d", q4:"b", q5:"c", q6:"c", q7:"d", q8:"a", q9:"b", q10:"c",
+    q11:"b", q12:"a", q13:"c", q14:"d", q15:"b", q16:"b", q17:"c", q18:"a", q19:"a", q20:"d"
+};
+
+const pesosSec4 = {a:1, b:2, c:3, d:4, e:5};
+let userData = {};
+let finalCode = "";
+
+// Cargar Cuestionario
+const quizForm = document.getElementById("quiz-form");
+preguntas.forEach((p, i) => {
+    let html = "";
+    if (p.sec) html += `<h2 class="section-title">${p.sec}</h2>`;
+    html += `<div class="question"><p><strong>${p.q}</strong></p><div class="options">`;
+    for (const [key, text] of Object.entries(p.options)) {
+        html += `<label><input type="radio" name="q${i+1}" value="${key}" required> ${key}) ${text}</label>`;
+    }
+    html += `</div></div>`;
+    quizForm.innerHTML += html;
+});
+quizForm.innerHTML += `<button type="submit" class="btn btn-yellow">Finalizar y Evaluar</button>`;
+
+// Navegación Registro -> Cuestionario
+document.getElementById("register-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    userData = {
+        nombre: document.getElementById("nombre").value.trim(),
+        apellido: document.getElementById("apellido").value.trim(),
+        edad: document.getElementById("edad").value,
+        genero: document.getElementById("genero").value
+    };
+    document.getElementById("register-container").style.display = "none";
+    document.getElementById("quiz-container").style.display = "block";
+    window.scrollTo(0,0);
+});
+
+// Evaluación
+document.getElementById("quiz-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    let puntajeRespuestas = 0;
+    
+    let dim1 = 0, dim2 = 0, dim3 = 0, dim4 = 0, dim5 = 0;
+    let sec4Str = "";
+
+    for (let i = 1; i <= 25; i++) {
+        let resp = formData.get(`q${i}`);
+        if (i <= 20) {
+            if (resp === respuestasCorrectas[`q${i}`]) {
+                puntajeRespuestas++;
+                if(i <= 10) dim1++;
+                else if(i <= 15) dim2++;
+                else dim3++;
+            }
+        } else {
+            let valor = pesosSec4[resp];
+            sec4Str += valor; // Para el código hash
+            if(i === 21 || i === 25) dim4 += valor;
+            else dim5 += valor;
+        }
+    }
+
+    let p1 = (dim1 / 10) * 100;
+    let p2 = (dim2 / 5) * 100;
+    let p3 = (dim3 / 5) * 100;
+    let p4 = (dim4 / 10) * 100; 
+    let p5 = (dim5 / 15) * 100;
+
+    generarResultados(puntajeRespuestas, [p1, p2, p3, p4, p5], sec4Str);
+});
+
+function generarResultados(score, dataRadar, sec4Str) {
+    document.getElementById("quiz-container").style.display = "none";
+    document.getElementById("result-wrapper").style.display = "block";
+    window.scrollTo(0,0);
+
+    // Llenar datos
+    document.getElementById("cert-nombre").innerText = `${userData.nombre} ${userData.apellido}`.toUpperCase();
+    document.getElementById("cert-edad").innerText = userData.edad;
+    document.getElementById("cert-genero").innerText = userData.genero;
+    document.getElementById("cert-score").innerText = `Calificación Técnica: ${score} / 20`;
+
+    // Generar Código Único: UNI-EDAD-GENERO(INICIAL)-PUNTAJE-RESPUESTAS4
+    let genInicial = userData.genero.charAt(0).toUpperCase();
+    finalCode = `UNI-${userData.edad}-${genInicial}-${score}-${sec4Str}`;
+    document.getElementById("cert-codigo").innerText = finalCode;
+
+    // Análisis Automático
+    let prom = dataRadar.reduce((a,b)=>a+b,0) / 5;
+    let txt = `<strong>Análisis de Perfil:</strong><br>El participante demuestra competencias en un nivel <strong>${prom > 75 ? 'ALTO' : prom > 50 ? 'MEDIO' : 'BÁSICO'}</strong>. `;
+    if (dataRadar[0] < 60) txt += "Se sugiere refuerzo en conceptos técnicos financieros. ";
+    if (dataRadar[1] >= 80) txt += "Destaca significativamente en capacidad analítica y resolución de casos. ";
+    if (dataRadar[3] >= 80 && dataRadar[4] >= 80) txt += "Muestra un comportamiento financiero prudente y planificado en su vida personal.";
+    document.getElementById("cert-analisis").innerHTML = txt;
+
+    // Gráfico
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Conocimiento Técnico', 'Habilidad Analítica', 'Toma de Decisiones', 'Planificación y Control', 'Prudencia Financiera'],
+            datasets: [{
+                label: 'Nivel (%)',
+                data: dataRadar,
+                fill: true,
+                backgroundColor: 'rgba(0, 51, 102, 0.2)',
+                borderColor: '#003366',
+                pointBackgroundColor: '#FFCC00',
+                pointBorderColor: '#003366',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#003366'
+            }]
+        },
+        options: {
+            scales: {
+                r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 100 }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+// Funciones de Botones
+function copiarCodigo() {
+    navigator.clipboard.writeText(finalCode).then(() => {
+        alert("¡Código copiado al portapapeles: " + finalCode + "!");
+    });
+}
+
+function descargarCertificado() {
+    window.scrollTo(0,0);
+    const element = document.getElementById('certificate');
+    html2canvas(element, { scale: 2 }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Certificado_${userData.nombre}_${userData.apellido}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+}
+
+function enviarWhatsApp() {
+    const telefono = "573133372099";
+    const mensaje = `Hola, soy ${userData.nombre} ${userData.apellido}. He terminado el cuestionario de Inteligencia Financiera. Mi código de análisis es: ${finalCode}`;
+    const url = `https://api.whatsapp.com/send?phone=${telefono}&text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+}
+</script>
+
+</body>
+</html>
