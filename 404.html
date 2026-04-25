@@ -20,10 +20,10 @@
             height: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--gris-contable);
-            overflow: hidden; /* Evita scroll para que el gato corra por toda la pantalla */
+            overflow: hidden;
         }
 
-        /* Encabezado Estilo Corporativo */
+        /* Estética Uniminuto / Contabilidad */
         .main-header {
             background-color: var(--azul-uniminuto);
             color: var(--blanco);
@@ -47,28 +47,22 @@
             gap: 10px;
         }
 
-        /* Contenido de Error */
         .content-404 {
             text-align: center;
-            margin-top: 10vh;
+            margin-top: 12vh;
             color: var(--azul-uniminuto);
-            position: relative;
             z-index: 10;
+            position: relative;
         }
 
         .content-404 h1 {
-            font-size: 10rem;
+            font-size: 8rem;
             margin: 0;
-            color: var(--azul-uniminuto);
-            opacity: 0.1; /* Efecto marca de agua */
-            position: absolute;
-            width: 100%;
-            top: -50px;
-            z-index: -1;
+            opacity: 0.15;
         }
 
         .content-404 h2 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin-bottom: 10px;
         }
 
@@ -76,39 +70,35 @@
             display: inline-block;
             background-color: var(--amarillo-uniminuto);
             color: var(--azul-uniminuto);
-            padding: 15px 35px;
+            padding: 12px 30px;
             text-decoration: none;
             font-weight: bold;
             border-radius: 4px;
-            margin-top: 25px;
-            transition: all 0.3s ease;
+            margin-top: 20px;
             border: 2px solid var(--azul-uniminuto);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: 0.3s;
         }
 
         .btn-home:hover {
-            background-color: var(--azul-uniminuto);
-            color: var(--amarillo-uniminuto);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background-color: var(--blanco);
+            transform: scale(1.05);
         }
 
-        /* Animación del Gato Local */
+        /* Configuración del Gato */
         #cat {
             position: fixed;
-            width: 100px; /* Ajusta según el tamaño de tu gif */
-            height: 100px;
+            width: 90px;
+            height: 90px;
             background-image: url('data/images/gato-corriendo.gif');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             pointer-events: none;
             z-index: 1000;
-            transition: opacity 0.5s ease;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
-        /* Footer */
         .main-footer {
             position: fixed;
             bottom: 0;
@@ -116,8 +106,8 @@
             background-color: var(--azul-uniminuto);
             color: var(--blanco);
             text-align: center;
-            padding: 12px 0;
-            font-size: 0.85rem;
+            padding: 10px 0;
+            font-size: 0.8rem;
             border-top: 3px solid var(--amarillo-uniminuto);
         }
     </style>
@@ -127,18 +117,18 @@
     <header class="main-header">
         <div class="container">
             <a href="index.html" class="logo">
-                <i class="fa-solid fa-file-invoice-dollar"></i> 
-                <strong>UNIMINUTO</strong> | Gestión Contable y Financiera
+                <i class="fa-solid fa-calculator"></i> 
+                <strong>UNIMINUTO</strong> | Sistema de Gestión Contable
             </a>
         </div>
     </header>
 
     <main class="content-404">
         <h1>404</h1>
-        <h2>Error de Conciliación</h2>
-        <p>El registro que busca no se encuentra en nuestra base de datos activa.</p>
-        <p>Nuestro asistente está rastreando la ubicación de su puntero para ayudarlo.</p>
-        <a href="index.html" class="btn btn-home">Volver al Inicio del Sistema</a>
+        <h2>Descuadre de Información</h2>
+        <p>Parece que el folio que buscas no ha sido registrado o fue movido de archivo.</p>
+        <p>Nuestro asistente está rastreando tu movimiento para guiarte.</p>
+        <a href="index.html" class="btn btn-home">Volver al Balance General</a>
     </main>
 
     <div id="cat"></div>
@@ -156,42 +146,58 @@
             let mouseY = window.innerHeight / 2;
             let catX = window.innerWidth / 2;
             let catY = window.innerHeight / 2;
-            const speed = 0.08; // Factor de suavizado (easing)
-
-            cat.style.opacity = '0';
             
-            // Aparece suavemente una vez cargado
+            // VELOCIDAD LENTA Y CONSTANTE (Como pediste)
+            const velocity = 2.5; 
+            let catVelocityX = 0;
+            let catVelocityY = 0;
+
+            // Aparece el gato después de un breve momento
             setTimeout(() => {
                 cat.style.opacity = '1';
-            }, 800);
+                cat.style.left = `${catX}px`;
+                cat.style.top = `${catY}px`;
+            }, 500);
 
             document.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
             });
 
-            function animate() {
-                // Cálculo de movimiento suave (Lerp)
-                const dx = mouseX - catX;
-                const dy = mouseY - catY;
+            function animateCat() {
+                const deltaX = mouseX - catX;
+                const deltaY = mouseY - catY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
                 
-                catX += dx * speed;
-                catY += dy * speed;
+                // Mantiene el movimiento lento si está lejos del mouse
+                if (distance > 40) { 
+                    const dirX = deltaX / distance;
+                    const dirY = deltaY / distance;
 
-                // Inversión de imagen (ScaleX) según dirección
-                if (dx < -1) { 
-                    cat.style.transform = 'translate(-50%, -50%) scaleX(-1)';
-                } else if (dx > 1) { 
-                    cat.style.transform = 'translate(-50%, -50%) scaleX(1)';
+                    catVelocityX = dirX * velocity;
+                    catVelocityY = dirY * velocity;
+                    
+                    // Giro del gato (ScaleX)
+                    if (deltaX < 0) { 
+                        cat.style.transform = 'translate(-50%, -50%) scaleX(-1)';
+                    } else { 
+                        cat.style.transform = 'translate(-50%, -50%) scaleX(1)';
+                    }
+                } else {
+                    catVelocityX = 0;
+                    catVelocityY = 0;
                 }
 
+                catX += catVelocityX;
+                catY += catVelocityY;
+                
                 cat.style.left = `${catX}px`;
                 cat.style.top = `${catY}px`;
                 
-                requestAnimationFrame(animate);
+                requestAnimationFrame(animateCat);
             }
 
-            animate();
+            animateCat();
         });
     </script>
 </body>
